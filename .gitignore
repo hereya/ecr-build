@@ -1,0 +1,9 @@
+.envrc
+.terraform
+terraform.tfstate*
+.terraform.*
+/.idea
+/.source.zip
+/.DS_Store
+
+*.zip
