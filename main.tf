@@ -36,6 +36,15 @@ variable "builder" {
   default = "heroku/builder:22"
 }
 
+variable "dockerhubUsername" {
+  default = null
+}
+
+variable "dockerhubPassword" {
+  default   = null
+  sensitive = true
+}
+
 data "aws_region" "current" {}
 
 resource "random_pet" "generated_image_name" {
@@ -55,14 +64,14 @@ locals {
   image_tags     = [data.archive_file.sourceDir.output_sha256, "latest"]
   repository_url = var.isPublicImage ? aws_ecrpublic_repository.public.0.repository_uri : aws_ecr_repository.private.0.repository_url
   ecr_url        = dirname(local.repository_url)
-  buildScript    = templatefile("${path.module}/build.tpl", {
+  buildScript = templatefile("${path.module}/build.tpl", {
     projectRootDir = var.hereyaProjectRootDir
     imageName      = local.image_name
     builder        = var.builder
     imageTags      = join(" ", [for tag in local.image_tags : "\"${tag}\""])
     ecrUrl         = local.ecr_url
     ecrSubCommand  = var.isPublicImage ? "ecr-public" : "ecr"
-    awsRegion         = var.isPublicImage ? "us-east-1" : data.aws_region.current.name
+    awsRegion      = var.isPublicImage ? "us-east-1" : data.aws_region.current.name
   })
 }
 
@@ -89,8 +98,12 @@ resource "terraform_data" "build" {
   ]
 
   provisioner "local-exec" {
-    command = local.buildScript
+    command     = local.buildScript
     interpreter = ["bash", "-c"]
+    environment = {
+      DOCKERHUB_USERNAME = var.dockerhubUsername
+      DOCKERHUB_PASSWORD = var.dockerhubPassword
+    }
   }
 }
 
