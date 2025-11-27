@@ -29,6 +29,11 @@ variable "isPublicImage" {
 variable "imageName" {
   default = null
 }
+
+variable "imageTags" {
+  default = null
+}
+
 variable "forceDeleteRepository" {
   default = true
 }
@@ -45,7 +50,7 @@ variable "dockerhubPassword" {
   sensitive = true
 }
 
-variable "useDocker" {
+variable "useDockerfile" {
   type        = bool
   default     = false
   description = "Use Docker build instead of buildpack. When true, expects a Dockerfile at project root."
@@ -67,7 +72,7 @@ data "archive_file" "sourceDir" {
 
 locals {
   image_name     = var.imageName != null ? var.imageName : random_pet.generated_image_name.0.id
-  image_tags     = [data.archive_file.sourceDir.output_sha256, "latest"]
+  image_tags     = concat([data.archive_file.sourceDir.output_sha256, "latest"], var.imageTags != null ? var.imageTags : [])
   repository_url = var.isPublicImage ? aws_ecrpublic_repository.public.0.repository_uri : aws_ecr_repository.private.0.repository_url
   ecr_url        = dirname(local.repository_url)
   buildScript = templatefile("${path.module}/build.tpl", {
@@ -78,7 +83,7 @@ locals {
     ecrUrl         = local.ecr_url
     ecrSubCommand  = var.isPublicImage ? "ecr-public" : "ecr"
     awsRegion      = var.isPublicImage ? "us-east-1" : data.aws_region.current.name
-    useDocker      = var.useDocker
+    useDockerfile  = var.useDockerfile
   })
 }
 

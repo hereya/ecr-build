@@ -8,7 +8,7 @@ if [[ -n "$${DOCKERHUB_PASSWORD}" && -n "$${DOCKERHUB_USERNAME}" ]]; then
   echo $${DOCKERHUB_PASSWORD} | docker login --username $${DOCKERHUB_USERNAME} --password-stdin
 fi
 
-if [ "${useDocker}" = "true" ]; then
+if [ "${useDockerfile}" = "true" ]; then
   docker build -t ${imageName}:latest .
 else
   pack build ${imageName}:latest --path . --builder ${builder} --env NODE_ENV="production"
