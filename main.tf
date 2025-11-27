@@ -31,7 +31,8 @@ variable "imageName" {
 }
 
 variable "imageTags" {
-  default = null
+  type    = list(string)
+  default = []
 }
 
 variable "forceDeleteRepository" {
@@ -72,7 +73,7 @@ data "archive_file" "sourceDir" {
 
 locals {
   image_name     = var.imageName != null ? var.imageName : random_pet.generated_image_name.0.id
-  image_tags     = concat([data.archive_file.sourceDir.output_sha256, "latest"], var.imageTags != null ? var.imageTags : [])
+  image_tags     = concat([data.archive_file.sourceDir.output_sha256, "latest"], var.imageTags)
   repository_url = var.isPublicImage ? aws_ecrpublic_repository.public.0.repository_uri : aws_ecr_repository.private.0.repository_url
   ecr_url        = dirname(local.repository_url)
   buildScript = templatefile("${path.module}/build.tpl", {
