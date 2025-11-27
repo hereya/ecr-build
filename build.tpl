@@ -8,7 +8,11 @@ if [[ -n "$${DOCKERHUB_PASSWORD}" && -n "$${DOCKERHUB_USERNAME}" ]]; then
   echo $${DOCKERHUB_PASSWORD} | docker login --username $${DOCKERHUB_USERNAME} --password-stdin
 fi
 
-pack build ${imageName}:latest --path . --builder ${builder} --env NODE_ENV="production"
+if [ "${useDocker}" = "true" ]; then
+  docker build -t ${imageName}:latest .
+else
+  pack build ${imageName}:latest --path . --builder ${builder} --env NODE_ENV="production"
+fi
 
 imageTags=(${imageTags}) && for tag in "$${imageTags[@]}";
 do

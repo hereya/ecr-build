@@ -45,6 +45,12 @@ variable "dockerhubPassword" {
   sensitive = true
 }
 
+variable "useDocker" {
+  type        = bool
+  default     = false
+  description = "Use Docker build instead of buildpack. When true, expects a Dockerfile at project root."
+}
+
 data "aws_region" "current" {}
 
 resource "random_pet" "generated_image_name" {
@@ -72,6 +78,7 @@ locals {
     ecrUrl         = local.ecr_url
     ecrSubCommand  = var.isPublicImage ? "ecr-public" : "ecr"
     awsRegion      = var.isPublicImage ? "us-east-1" : data.aws_region.current.name
+    useDocker      = var.useDocker
   })
 }
 
