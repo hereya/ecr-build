@@ -9,7 +9,7 @@ if [[ -n "$${DOCKERHUB_PASSWORD}" && -n "$${DOCKERHUB_USERNAME}" ]]; then
 fi
 
 if [ "${useDockerfile}" = "true" ]; then
-  docker build -t ${imageName}:latest .
+  docker build --platform linux/amd64 -t ${imageName}:latest .
 else
   pack build ${imageName}:latest --path . --builder ${builder} --env NODE_ENV="production"
 fi
